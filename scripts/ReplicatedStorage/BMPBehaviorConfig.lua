@@ -1,0 +1,2 @@
+-- ReplicatedStorage.BMPBehaviorConfig  (ModuleScript)
+return { ScanHalfAngle = 40, ScanSpeed = 7, ScanPause = 3, LineWidth = 0.15, ScanPauseMax = 6, ScanAcceleration = 10, ScanStepMin = 8, ScanStepMax = 22 }

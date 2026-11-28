@@ -6,6 +6,10 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v454) — SQUAD screen: clearer slots
+- Slots have solid borders, a red number badge and more spacing; UNIT / SKILL / DEFENSE headers are red.
+- **Impact:** none.
+
 ## 2026-11-28 (v451) — Lobby SQUAD screen + Nightmare difficulty
 - NEXT on the map opens the SQUAD screen: avatar, player-2 box (soon), difficulty, unit slots 1–6, skill slots 1–3,
   defense slots 1–4, items box with tabs and LOADOUT points, START (does nothing yet), BACK.

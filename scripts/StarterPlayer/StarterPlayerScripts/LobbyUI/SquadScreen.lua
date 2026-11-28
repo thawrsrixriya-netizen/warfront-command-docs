@@ -14,6 +14,7 @@ local player = Players.LocalPlayer
 
 local C = {
 	Steel = Color3.fromRGB(30, 34, 33), SteelHi = Color3.fromRGB(46, 51, 49), Slot = Color3.fromRGB(22, 25, 25),
+	SlotBox = Color3.fromRGB(40, 44, 44), SlotFull = Color3.fromRGB(56, 61, 60),
 	Neon = Color3.fromRGB(255, 40, 40), NeonSoft = Color3.fromRGB(255, 90, 90),
 	Text = Color3.fromRGB(236, 230, 226), Muted = Color3.fromRGB(140, 145, 140), Ok = Color3.fromRGB(110, 220, 120),
 	Unit = Color3.fromRGB(90, 160, 220), Skill = Color3.fromRGB(240, 150, 60), Defense = Color3.fromRGB(150, 190, 110),
@@ -117,10 +118,10 @@ function SquadScreen.new(parentGui, onBack)
 	------------------------------------------------------------ bottom area
 	local bottom = new("Frame", { Name = "Bottom", Position = UDim2.new(0, 16, 0.52, 0), Size = UDim2.new(1, -32, 0.48, -16), BackgroundTransparency = 1 }, root)
 	local HEAD = 24
-	local function column(name, x, w, heading)
+	local function column(name, x, w, heading, headColor)
 		local col = new("Frame", { Name = name, Position = UDim2.fromScale(x, 0), Size = UDim2.new(w, -8, 1, 0), BackgroundTransparency = 1 }, bottom)
 		if heading then
-			label(col, { Size = UDim2.new(1, 0, 0, HEAD), Font = Enum.Font.GothamBlack, TextSize = 15, Text = heading })
+			label(col, { Size = UDim2.new(1, 0, 0, HEAD), Font = Enum.Font.GothamBlack, TextSize = 15, TextColor3 = headColor or C.Text, Text = heading })
 		end
 		return col
 	end
@@ -156,12 +157,14 @@ function SquadScreen.new(parentGui, onBack)
 	local listFor = { Unit = state.Units, Skill = state.Skills, Defense = state.Defense }
 	local refreshAll -- forward
 	local function makeSlot(parent, kind, index, pos, size)
-		local b = new("TextButton", { Name = kind .. index, Text = "", AutoButtonColor = false, Position = pos, Size = size, BackgroundColor3 = C.Slot, BorderSizePixel = 0 }, parent)
-		corner(b)
-		local st = new("UIStroke", { Color = C.NeonSoft, Thickness = 1, Transparency = 0.35 }, b)
-		label(b, { Position = UDim2.fromOffset(6, 3), Size = UDim2.fromOffset(20, 14), TextSize = 12, TextColor3 = C.Muted, TextXAlignment = Enum.TextXAlignment.Left, Text = tostring(index) })
-		local name = label(b, { Size = UDim2.fromScale(1, 1), Font = Enum.Font.GothamBlack, TextSize = 16, Text = "+" })
-		local extra = label(b, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -6, 1, -3), Size = UDim2.fromOffset(40, 12), TextSize = 10, TextColor3 = C.Muted, TextXAlignment = Enum.TextXAlignment.Right, Text = "" })
+		local b = new("TextButton", { Name = kind .. index, Text = "", AutoButtonColor = false, Position = pos, Size = size, BackgroundColor3 = C.SlotBox, BorderSizePixel = 0 }, parent)
+		corner(b, 4)
+		local st = new("UIStroke", { Color = C.NeonSoft, Thickness = 2, Transparency = 0.15, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, b)
+		local num = new("Frame", { Name = "Number", Size = UDim2.fromOffset(22, 18), BackgroundColor3 = C.Neon, BackgroundTransparency = 0.15, BorderSizePixel = 0 }, b)
+		corner(num, 3)
+		label(num, { Size = UDim2.fromScale(1, 1), Font = Enum.Font.GothamBlack, TextSize = 12, Text = tostring(index) })
+		local name = label(b, { Size = UDim2.fromScale(1, 1), Font = Enum.Font.GothamBlack, TextSize = 18, Text = "+" })
+		local extra = label(b, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -6, 1, -3), Size = UDim2.fromOffset(44, 13), TextSize = 11, TextColor3 = C.Text, TextXAlignment = Enum.TextXAlignment.Right, Text = "" })
 		slotFrames[kind][index] = { Button = b, Stroke = st, Name = name, Extra = extra }
 		b.Activated:Connect(function()
 			local list = listFor[kind]
@@ -174,20 +177,20 @@ function SquadScreen.new(parentGui, onBack)
 		end)
 	end
 
-	local unitCol = column("Units", 0.17, 0.11, "UNIT")
+	local unitCol = column("Units", 0.17, 0.11, "UNIT", C.NeonSoft)
 	for i = 1, Items.UnitSlots do
-		makeSlot(unitCol, "Unit", i, UDim2.new(0, 0, (i - 1) / Items.UnitSlots, HEAD + 4 - (i - 1) * (HEAD + 4) / Items.UnitSlots), UDim2.new(1, 0, 1 / Items.UnitSlots, -(HEAD + 4) / Items.UnitSlots - 4))
+		makeSlot(unitCol, "Unit", i, UDim2.new(0, 0, (i - 1) / Items.UnitSlots, HEAD + 4 - (i - 1) * (HEAD + 4) / Items.UnitSlots), UDim2.new(1, 0, 1 / Items.UnitSlots, -(HEAD + 4) / Items.UnitSlots - 8))
 	end
-	local skillCol = column("Skills", 0.28, 0.14, "SKILL")
+	local skillCol = column("Skills", 0.28, 0.14, "SKILL", C.NeonSoft)
 	local nS, nD = Items.SkillSlots, Items.DefenseSlots
 	local rows = nS + nD
 	local SUB = 20
 	local avail = function(i) return UDim2.new(0, 0, (i - 1) / rows, HEAD + 4 - (i - 1) * (HEAD + 4 + SUB) / rows) end
-	local rowSize = UDim2.new(1, 0, 1 / rows, -(HEAD + 4 + SUB) / rows - 4)
+	local rowSize = UDim2.new(1, 0, 1 / rows, -(HEAD + 4 + SUB) / rows - 7)
 	for i = 1, nS do
 		makeSlot(skillCol, "Skill", i, avail(i), rowSize)
 	end
-	local defHead = label(skillCol, { Position = UDim2.new(0, 0, nS / rows, HEAD + 4 - nS * (HEAD + 4 + SUB) / rows - 2), Size = UDim2.new(1, 0, 0, SUB), Font = Enum.Font.GothamBlack, TextSize = 13, TextColor3 = C.Defense, Text = "DEFENSE" })
+	local defHead = label(skillCol, { Position = UDim2.new(0, 0, nS / rows, HEAD + 4 - nS * (HEAD + 4 + SUB) / rows - 2), Size = UDim2.new(1, 0, 0, SUB), Font = Enum.Font.GothamBlack, TextSize = 14, TextColor3 = C.NeonSoft, Text = "DEFENSE" })
 	for i = 1, nD do
 		local p = avail(nS + i)
 		makeSlot(skillCol, "Defense", i, UDim2.new(p.X.Scale, p.X.Offset, p.Y.Scale, p.Y.Offset + SUB), rowSize)
@@ -309,9 +312,10 @@ function SquadScreen.new(parentGui, onBack)
 				local item = list[i] and byId[list[i]]
 				f.Name.Text = item and item.Short or "+"
 				f.Name.TextColor3 = item and C.Text or C.Muted
+				f.Button.BackgroundColor3 = item and C.SlotFull or C.SlotBox
 				f.Extra.Text = (item and item.Points) and (item.Points .. " PTS") or ""
 				f.Stroke.Color = item and KIND_COLOR[kind] or C.NeonSoft
-				f.Stroke.Transparency = item and 0.1 or 0.4
+				f.Stroke.Transparency = item and 0 or 0.15
 			end
 		end
 		for id, t in pairs(tabs) do

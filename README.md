@@ -42,6 +42,7 @@ systems/           one page per system: files, how to use it, what not to change
   minimap.md         round minimap + big map
   capture.md         centre base capture
   waves.md           enemy waves (placeholder bots)
+  lobby.md           2D lobby screen (shown on join)
 scripts/           read-only snapshot of the game's scripts (see scripts/README.md)
 .github/ISSUE_TEMPLATE/change-report.md   how ChatGPT reports big changes
 ```

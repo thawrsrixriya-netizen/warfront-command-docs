@@ -6,6 +6,14 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v444) — 2D lobby screen
+- The lobby is now a 2D screen in the game place (`StarterPlayerScripts.LobbyUI`), shown on join: military-base look,
+  red neon edges, left column PLAY / UNIT / SHOP / TRADE (soon), Settings + Leaderboard squares, grey monitor in the
+  centre. **No button works yet.** Admins have CLOSE LOBBY (TEST) / LOBBY buttons to get into the match.
+- While open it blocks game keys; player attribute `InLobby` = true.
+- **Impact:** the separate 3D lobby (friend) is no longer planned for now. UI that appears on join should stay hidden
+  while `InLobby` is true. See systems/lobby.md.
+
 ## 2026-11-27 — First script snapshot
 - `scripts/` now holds all 89 game scripts from ServerScriptService, ReplicatedStorage and StarterPlayer
   (read-only reference; see scripts/README.md).

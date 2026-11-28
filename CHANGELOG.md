@@ -6,6 +6,14 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v458) — START works (loading screen → match)
+- START on the SQUAD screen (needs at least one unit) shows the friend's loading screen — a copy of
+  `ReplicatedFirst.WarfrontLoading.Template`, the friend's `LoadingController` is not changed — closes the lobby
+  behind it and fades into the match in this same place. Player attribute `LobbyDifficulty` = chosen difficulty
+  (not used by the match yet). The admin CLOSE LOBBY / LOBBY test buttons were removed.
+- **Impact (friend):** the loading screen's `Template` (ScreenGui → `BlackScreen` CanvasGroup) is now also used by the
+  lobby START. If you change it, keep the names `Template` and `BlackScreen` (the lobby fades `GroupTransparency`).
+
 ## 2026-11-28 (v457) — SQUAD screen: one-colour hover, full card borders
 - On hover a box's own border also turns red (no blue/orange line inside the red glow); it returns to its type
   colour when the mouse leaves. Item cards have padding so their border/glow is no longer cut off.

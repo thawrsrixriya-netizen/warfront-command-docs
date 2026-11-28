@@ -20,11 +20,11 @@ player sees on join, drawn over the match.
   picture placeholder (`Image` in the config, empty for now), short info, and a **4-slot weather forecast**
   (RAIN, FOG, DAY, NIGHT; possible weather lit, the rest dimmed). Forecast only — players cannot pick weather.
   Planned: weather buffs/nerfs units (e.g. night = shorter sight, day = longer sight).
-- **NEXT** (bottom right) turns red for a playable place; it does nothing yet. **BACK** (top right) returns to the menu.
+- **NEXT** (bottom right) turns red for a playable place and opens the SQUAD screen. **BACK** (top right) returns to the menu.
 - Edit names, positions, coastline, mountains, rivers, roads and weather in `LobbyMapConfig` (owner's file).
 
 ## SQUAD screen (after NEXT) — `LobbyUI.SquadScreen` + `ReplicatedStorage.LobbyItemsConfig`
-- Top: the player's avatar (tall box), a "+" box for PLAYER 2 (invite — soon), **START** (red, does nothing yet)
+- Top: the player's avatar (tall box), a "+" box for PLAYER 2 (invite — soon), **START** (red; with at least one unit it starts the match, see below)
   and **BACK** (returns to the map). The chosen place is shown under the SQUAD title.
 - Bottom, left to right: **difficulty** EASY 20 / NORMAL 30 / HARD 35 / **NIGHTMARE 40** waves (new difficulty;
   `WaveConfig.TotalWaves.Nightmare = 40`), **UNIT** slots 1–6, **SKILL** slots 1–3 + **DEFENSE** slots 1–4, and the
@@ -35,12 +35,14 @@ player sees on join, drawn over the match.
   `LobbyItemsConfig`. The chosen difficulty and loadout do not reach the match yet.
 
 ## Behaviour today
-- PLAY → map → NEXT → SQUAD works; **START, UNIT, SHOP, TRADE, Settings, Leaderboard and PLAYER 2 do nothing yet**
+- PLAY → map → NEXT → SQUAD → START works; **UNIT, SHOP, TRADE, Settings, Leaderboard and PLAYER 2 do nothing yet**
   (hover only). The owner designs each screen next.
 - While open it covers the match and swallows game keys (1–6, M, WASD, arrows, Space, Q, E, Z, F, T, C, G, X), so
   nothing happens in the match behind it. Player attribute `InLobby` = true while open.
-- Admins (`EconomyConfig.Admins`) get a **CLOSE LOBBY (TEST)** button (top right) to go into the match for testing,
-  and a small **LOBBY** button (top right) to reopen it. Other players cannot leave the lobby yet.
+- **START** shows the friend's loading screen (a copy of `ReplicatedFirst.WarfrontLoading.Template`), closes the lobby
+  behind it and fades into the match in this same place (separate match places come later). The chosen difficulty is
+  stored in the player attribute `LobbyDifficulty` (not used by the match yet). The admin CLOSE LOBBY / LOBBY test
+  buttons were removed.
 
 ## For the friend / ChatGPT
 - Don't build another lobby UI; the friend's earlier 3D lobby plan is replaced by this 2D screen.

@@ -1,12 +1,13 @@
 -- StarterPlayer.StarterPlayerScripts.LobbyUI.SquadScreen  (ModuleScript)
 -- SquadScreen (client, owner): lobby screen after PLAY -> map -> NEXT. Owner's sketch:
---   top: player character (avatar) + "+" box for player 2 (soon); START (does nothing yet) + BACK.
+--   top: player character (avatar) + "+" box for player 2 (soon); START (loading screen -> match) + BACK.
 --   bottom: difficulty (EASY/NORMAL/HARD/NIGHTMARE) | UNIT slots 1-6 | SKILL slots 1-3 + DEFENSE slots 1-4 |
 --   red box = the player's items (from the shop) with tabs UNITS / SKILLS / DEFENSE, a details strip and loadout points.
 -- Click a card to see it and equip/unequip it; click a filled slot to empty it; click an empty "+" slot to jump
 -- to that kind's tab (with a press animation). Units cost loadout points.
 -- PLACEHOLDER: state is local only (nothing saved, no shop yet). Data: ReplicatedStorage.LobbyItemsConfig.
--- API: local s = SquadScreen.new(parentGui, onBack); s.Open(location); s.Close(); s.State()
+-- API: local s = SquadScreen.new(parentGui, onBack, onStart); s.Open(location); s.Close(); s.State()
+-- onStart(state) runs when START is pressed with at least one unit in the loadout.
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -84,7 +85,7 @@ end
 
 local SquadScreen = {}
 
-function SquadScreen.new(parentGui, onBack)
+function SquadScreen.new(parentGui, onBack, onStart)
 	local root = new("Frame", { Name = "SquadScreen", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, ZIndex = 2 }, parentGui)
 
 	-- state (local placeholder)
@@ -138,6 +139,22 @@ function SquadScreen.new(parentGui, onBack)
 	hoverGlow(start, startGlow, 0.7)
 	label(start, { Size = UDim2.new(1, 0, 1, -12), Font = Enum.Font.GothamBlack, TextSize = 36, Text = "START" })
 	local startHint = label(start, { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, 0, 0, 14), TextSize = 11, TextTransparency = 0.25, Text = "" })
+	local starting = false
+	start.Activated:Connect(function()
+		if starting or #state.Units == 0 then
+			return
+		end
+		starting = true
+		local sc = start:FindFirstChildOfClass("UIScale") or new("UIScale", {}, start)
+		sc.Scale = 0.92
+		TweenService:Create(sc, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		if onStart then
+			onStart(state)
+		end
+		task.delay(1, function()
+			starting = false
+		end)
+	end)
 
 	------------------------------------------------------------ bottom area
 	local bottom = new("Frame", { Name = "Bottom", Position = UDim2.new(0, 16, 0.52, 0), Size = UDim2.new(1, -32, 0.48, -16), BackgroundTransparency = 1 }, root)
@@ -397,7 +414,7 @@ function SquadScreen.new(parentGui, onBack)
 			dName.Text = selectedItem.Name .. (selectedItem.Points and ("  -  " .. selectedItem.Points .. " PTS") or "")
 			dDesc.Text = selectedItem.Desc or ""
 		end
-		startHint.Text = (#state.Units == 0) and "ADD AT LEAST 1 UNIT" or "COMING SOON"
+		startHint.Text = (#state.Units == 0) and "ADD AT LEAST 1 UNIT" or (state.Difficulty and string.upper(state.Difficulty) or "")
 		buildCards()
 	end
 

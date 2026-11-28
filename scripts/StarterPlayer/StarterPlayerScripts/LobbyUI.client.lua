@@ -2,16 +2,15 @@
 -- LobbyUI (client, owner): the 2D lobby shown when a player joins (military-base look, red neon edges).
 -- PLAY opens the battlefield map (child module PlayScreen). Layout (owner's sketch): left column PLAY / UNIT / SHOP / TRADE (SOON), two small square buttons under it
 -- (settings, leaderboard), a grey "monitor" screen in the middle. Buttons do nothing yet (hover only).
--- While the lobby is open it covers the match and swallows game keys. Admins (EconomyConfig.Admins) get a small
--- "CLOSE LOBBY (TEST)" button; when closed, a small "LOBBY" button reopens it.
+-- While the lobby is open it covers the match and swallows game keys. START on the SQUAD screen shows the friend's
+-- loading screen (ReplicatedFirst.WarfrontLoading.Template), closes the lobby behind it and fades into the match
+-- (same place for now - separate match places come later).
 -- Other scripts: player attribute InLobby (true while open).
 local Players = game:GetService("Players")
 local ContextActionService = game:GetService("ContextActionService")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local EconomyConfig = require(ReplicatedStorage:WaitForChild("EconomyConfig"))
 local player = Players.LocalPlayer
-local isAdmin = EconomyConfig.Admins[player.UserId] == true
 
 local C = {
 	Bg1 = Color3.fromRGB(14, 17, 15),
@@ -201,7 +200,6 @@ local KEYS = {
 	Enum.KeyCode.Q, Enum.KeyCode.E, Enum.KeyCode.Z, Enum.KeyCode.F, Enum.KeyCode.T, Enum.KeyCode.C, Enum.KeyCode.G,
 	Enum.KeyCode.X, Enum.KeyCode.Up, Enum.KeyCode.Down, Enum.KeyCode.Left, Enum.KeyCode.Right,
 }
-local reopen
 local function setOpen(open)
 	gui.Enabled = open
 	player:SetAttribute("InLobby", open)
@@ -212,36 +210,58 @@ local function setOpen(open)
 	else
 		ContextActionService:UnbindAction(SINK)
 	end
-	if reopen then
-		reopen.Visible = not open
-	end
 end
 
-if isAdmin then
-	-- left of the BACK buttons so it never covers a screen's content
-	local close = new("TextButton", { Name = "CloseTest", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -180, 0, 26), ZIndex = 5, Size = UDim2.fromOffset(170, 30), BackgroundColor3 = C.Steel, BorderSizePixel = 0, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = C.Text, Text = "CLOSE LOBBY (TEST)" }, gui)
-	corner(close, 3)
-	neon(close, 1)
-	close.Activated:Connect(function()
-		setOpen(false)
-	end)
-	local tiny = new("ScreenGui", { Name = "LobbyReopen", ResetOnSpawn = false, DisplayOrder = 49 }, player.PlayerGui)
-	reopen = new("TextButton", { Name = "Lobby", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 8), Size = UDim2.fromOffset(80, 26), BackgroundColor3 = C.Steel, BorderSizePixel = 0, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = C.Text, Text = "LOBBY", Visible = false }, tiny)
-	corner(reopen, 3)
-	neon(reopen, 1)
-	reopen.Activated:Connect(function()
-		setOpen(true)
-	end)
-end
 
 ---------------------------------------------------------------- PLAY -> battlefield map screen (child module PlayScreen)
 local PlayScreen = require(script:WaitForChild("PlayScreen"))
 local SquadScreen = require(script:WaitForChild("SquadScreen"))
 local play, squad
 -- map NEXT -> squad screen (child module SquadScreen); squad BACK -> map
+-- START: friend's loading screen (a copy of its Template) covers the screen, the lobby closes behind it,
+-- then it fades out into the match. Input is blocked while it shows.
+local function startMatch(state)
+	local template = game:GetService("ReplicatedFirst"):FindFirstChild("WarfrontLoading")
+	template = template and template:FindFirstChild("Template")
+	local minimum = template and template.Parent:GetAttribute("MinimumDisplaySeconds") or 1.35
+	local cover, canvas
+	if template then
+		cover = template:Clone()
+		cover.Name = "MatchLoadingScreen"
+		canvas = cover:FindFirstChild("BlackScreen")
+		if canvas then
+			canvas.GroupTransparency = 1
+		end
+		cover.Parent = player.PlayerGui
+	end
+	ContextActionService:BindActionAtPriority("LobbyStartLoading", function()
+		return Enum.ContextActionResult.Sink
+	end, false, 10000, Enum.UserInputType.Keyboard, Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseWheel, Enum.UserInputType.Touch)
+	if canvas then
+		TweenService:Create(canvas, TweenInfo.new(0.35), { GroupTransparency = 0 }):Play()
+		task.wait(0.4)
+	end
+	player:SetAttribute("LobbyDifficulty", state and state.Difficulty or nil)
+	squad.Close()
+	main.Visible = true
+	setOpen(false)
+	task.wait(math.max(minimum, 1.5))
+	if canvas then
+		local t = TweenService:Create(canvas, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { GroupTransparency = 1 })
+		t:Play()
+		t.Completed:Wait()
+	end
+	ContextActionService:UnbindAction("LobbyStartLoading")
+	if cover then
+		cover:Destroy()
+	end
+end
+
 squad = SquadScreen.new(gui, function()
 	squad.Close()
 	play.Open()
+end, function(state)
+	task.spawn(startMatch, state)
 end)
 play = PlayScreen.new(gui, function()
 	play.Close()

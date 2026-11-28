@@ -54,13 +54,24 @@ local function hoverGlow(button, glow, base)
 	end)
 end
 
--- hover highlight for every clickable box: a thick soft red glow fades in under the mouse
-local function addHover(button)
-	local glow = new("UIStroke", { Name = "HoverGlow", Color = Color3.fromRGB(255, 40, 40), Thickness = 5, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, button)
+-- hover highlight for every clickable box: a thick red glow fades in under the mouse, and the box's own
+-- border (mainStroke) turns the same red so the edge is one colour. A stroke's normal colour is kept in its
+-- "Base" attribute (refreshAll writes it), and is restored when the mouse leaves.
+local HOVER_RED = Color3.fromRGB(255, 40, 40)
+local function addHover(button, mainStroke)
+	local glow = new("UIStroke", { Name = "HoverGlow", Color = HOVER_RED, Thickness = 5, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, button)
 	button.MouseEnter:Connect(function()
+		button:SetAttribute("Hovered", true)
+		if mainStroke then
+			mainStroke.Color = HOVER_RED
+		end
 		TweenService:Create(glow, TweenInfo.new(0.12), { Transparency = 0.1 }):Play()
 	end)
 	button.MouseLeave:Connect(function()
+		button:SetAttribute("Hovered", false)
+		if mainStroke then
+			mainStroke.Color = mainStroke:GetAttribute("Base") or mainStroke.Color
+		end
 		TweenService:Create(glow, TweenInfo.new(0.18), { Transparency = 1 }):Play()
 	end)
 	return glow
@@ -182,7 +193,7 @@ function SquadScreen.new(parentGui, onBack)
 		local b = new("TextButton", { Name = kind .. index, Text = "", AutoButtonColor = false, Position = pos, Size = size, BackgroundColor3 = C.SlotBox, BorderSizePixel = 0 }, parent)
 		corner(b, 4)
 		local st = new("UIStroke", { Color = C.NeonSoft, Thickness = 2, Transparency = 0.15, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, b)
-		addHover(b)
+		addHover(b, st)
 		local num = new("Frame", { Name = "Number", Size = UDim2.fromOffset(22, 18), BackgroundColor3 = C.Neon, BackgroundTransparency = 0.15, BorderSizePixel = 0 }, b)
 		corner(num, 3)
 		label(num, { Size = UDim2.fromScale(1, 1), Font = Enum.Font.GothamBlack, TextSize = 12, Text = tostring(index) })
@@ -241,7 +252,9 @@ function SquadScreen.new(parentGui, onBack)
 	local tabRow = new("Frame", { Name = "Tabs", Position = UDim2.fromOffset(12, 82), Size = UDim2.new(1, -24, 0, 30), BackgroundTransparency = 1 }, inv)
 	new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) }, tabRow)
 	local grid = new("ScrollingFrame", { Name = "Cards", Position = UDim2.fromOffset(12, 120), Size = UDim2.new(1, -24, 1, -130), BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 4, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y }, inv)
-	new("UIGridLayout", { CellSize = UDim2.fromOffset(118, 96), CellPadding = UDim2.fromOffset(10, 10) }, grid)
+	new("UIGridLayout", { CellSize = UDim2.fromOffset(118, 96), CellPadding = UDim2.fromOffset(14, 14) }, grid)
+	-- room around the cards so their border/hover glow is not cut off by the scrolling frame's clipping
+	new("UIPadding", { PaddingTop = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8) }, grid)
 
 	local invLine = inv:FindFirstChildOfClass("UIStroke")
 	function focusItems()
@@ -322,7 +335,8 @@ function SquadScreen.new(parentGui, onBack)
 				local equipped = isEquipped(item.Id)
 				local card = new("TextButton", { Name = item.Id, Text = "", AutoButtonColor = false, BackgroundColor3 = equipped and C.SteelHi or C.Slot, BorderSizePixel = 0 }, grid)
 				corner(card)
-				new("UIStroke", { Color = (selectedItem == item) and C.Neon or (equipped and C.NeonSoft or Color3.fromRGB(70, 75, 72)), Thickness = (selectedItem == item) and 2 or 1 }, card)
+				local cardStroke = new("UIStroke", { Color = (selectedItem == item) and C.Neon or (equipped and C.NeonSoft or Color3.fromRGB(70, 75, 72)), Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, card)
+				cardStroke:SetAttribute("Base", cardStroke.Color)
 				new("Frame", { Size = UDim2.new(1, 0, 0, 4), BackgroundColor3 = KIND_COLOR[item.Kind], BorderSizePixel = 0 }, card)
 				label(card, { Position = UDim2.fromOffset(0, 10), Size = UDim2.new(1, 0, 0, 40), Font = Enum.Font.GothamBlack, TextSize = 24, TextColor3 = item.Owned and C.Text or C.Muted, Text = item.Short })
 				label(card, { Position = UDim2.fromOffset(4, 52), Size = UDim2.new(1, -8, 0, 16), TextSize = 11, TextColor3 = item.Owned and C.Text or C.Muted, TextTruncate = Enum.TextTruncate.AtEnd, Text = item.Name })
@@ -334,9 +348,10 @@ function SquadScreen.new(parentGui, onBack)
 				card.MouseButton1Down:Connect(function()
 					pressAnim(card)
 				end)
-				local hov = addHover(card)
+				local hov = addHover(card, cardStroke)
 				if card.GuiState == Enum.GuiState.Hover then
 					hov.Transparency = 0.1 -- rebuilt under the mouse: keep the glow
+					cardStroke.Color = HOVER_RED
 				end
 			end
 		end
@@ -363,7 +378,9 @@ function SquadScreen.new(parentGui, onBack)
 				f.Name.TextColor3 = item and C.Text or C.Muted
 				f.Button.BackgroundColor3 = item and C.SlotFull or C.SlotBox
 				f.Extra.Text = (item and item.Points) and (item.Points .. " PTS") or ""
-				f.Stroke.Color = item and KIND_COLOR[kind] or C.NeonSoft
+				local base = item and KIND_COLOR[kind] or C.NeonSoft
+				f.Stroke:SetAttribute("Base", base)
+				f.Stroke.Color = f.Button:GetAttribute("Hovered") and HOVER_RED or base
 				f.Stroke.Transparency = item and 0 or 0.15
 			end
 		end

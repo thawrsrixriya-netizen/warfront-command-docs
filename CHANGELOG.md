@@ -6,6 +6,11 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v457) — SQUAD screen: one-colour hover, full card borders
+- On hover a box's own border also turns red (no blue/orange line inside the red glow); it returns to its type
+  colour when the mouse leaves. Item cards have padding so their border/glow is no longer cut off.
+- **Impact:** none.
+
 ## 2026-11-28 (v456) — SQUAD screen: hover highlight
 - Slots, difficulty buttons, tabs and item cards get a thick red glow border under the mouse.
 - **Impact:** none.

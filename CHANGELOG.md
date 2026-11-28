@@ -6,6 +6,14 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v446) — Lobby PLAY screen: battlefield map
+- PLAY opens a country map (fictional "Velmoria", placeholder names) with 6 battlefield markers; only Dolvin Village
+  (the current match map) is playable. Selecting one shows a side panel with picture placeholder and a 4-slot
+  weather forecast (rain, fog, day, night). NEXT lights up for playable places but does nothing yet; BACK returns.
+- New: `ReplicatedStorage.LobbyMapConfig`, `StarterPlayerScripts.LobbyUI.PlayScreen`.
+- **Impact:** a new match map = a new entry in `LobbyMapConfig.Locations` (ask the owner). Weather effects on units
+  are planned (owner); do not build your own weather buffs.
+
 ## 2026-11-28 (v444) — 2D lobby screen
 - The lobby is now a 2D screen in the game place (`StarterPlayerScripts.LobbyUI`), shown on join: military-base look,
   red neon edges, left column PLAY / UNIT / SHOP / TRADE (soon), Settings + Leaderboard squares, grey monitor in the

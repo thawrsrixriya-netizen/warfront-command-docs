@@ -1,6 +1,6 @@
 -- StarterPlayer.StarterPlayerScripts.LobbyUI  (LocalScript)
 -- LobbyUI (client, owner): the 2D lobby shown when a player joins (military-base look, red neon edges).
--- Layout (owner's sketch): left column PLAY / UNIT / SHOP / TRADE (SOON), two small square buttons under it
+-- PLAY opens the battlefield map (child module PlayScreen). Layout (owner's sketch): left column PLAY / UNIT / SHOP / TRADE (SOON), two small square buttons under it
 -- (settings, leaderboard), a grey "monitor" screen in the middle. Buttons do nothing yet (hover only).
 -- While the lobby is open it covers the match and swallows game keys. Admins (EconomyConfig.Admins) get a small
 -- "CLOSE LOBBY (TEST)" button; when closed, a small "LOBBY" button reopens it.
@@ -68,9 +68,12 @@ band(1, 1)
 local vignette = new("Frame", { Name = "Vignette", Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), BorderSizePixel = 0, BackgroundTransparency = 0 }, bg)
 new("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(0.25, 1), NumberSequenceKeypoint.new(0.75, 1), NumberSequenceKeypoint.new(1, 0.35) }) }, vignette)
 
+-- the main lobby page (menu + monitor); hidden while a sub-screen such as PLAY is open
+local main = new("Frame", { Name = "Main", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 }, gui)
+
 ---------------------------------------------------------------- left column
 local LEFT, TOP, COL_W, BTN_H = 28, 70, 330, 128
-local column = new("Frame", { Name = "Menu", Position = UDim2.fromOffset(LEFT, TOP), Size = UDim2.fromOffset(COL_W, BTN_H * 4), BackgroundTransparency = 1 }, gui)
+local column = new("Frame", { Name = "Menu", Position = UDim2.fromOffset(LEFT, TOP), Size = UDim2.fromOffset(COL_W, BTN_H * 4), BackgroundTransparency = 1 }, main)
 
 local buttons = {}
 local function menuButton(i, title, sub, disabled)
@@ -148,7 +151,7 @@ local function squareButton(x, name, icon, fallback)
 		BackgroundColor3 = C.Steel,
 		BorderSizePixel = 0,
 		Image = "",
-	}, gui)
+	}, main)
 	corner(b, 3)
 	local _, glow = neon(b, 2)
 	new("ImageLabel", { Name = "Icon", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(30, 30), BackgroundTransparency = 1, Image = icon, ImageColor3 = C.Text }, b)
@@ -173,7 +176,7 @@ local monitor = new("Frame", {
 	Size = UDim2.new(1, -(screenLeft + 40), 1, -(TOP + 60)),
 	BackgroundColor3 = C.Steel,
 	BorderSizePixel = 0,
-}, gui)
+}, main)
 corner(monitor, 6)
 neon(monitor, 2)
 local glass = new("Frame", { Name = "Screen", Position = UDim2.fromOffset(14, 14), Size = UDim2.new(1, -28, 1, -28), BackgroundColor3 = Color3.new(1, 1, 1), BorderSizePixel = 0, ClipsDescendants = true }, monitor)
@@ -215,7 +218,7 @@ local function setOpen(open)
 end
 
 if isAdmin then
-	local close = new("TextButton", { Name = "CloseTest", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 18), Size = UDim2.fromOffset(170, 30), BackgroundColor3 = C.Steel, BorderSizePixel = 0, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = C.Text, Text = "CLOSE LOBBY (TEST)" }, gui)
+	local close = new("TextButton", { Name = "CloseTest", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 18), ZIndex = 5, Size = UDim2.fromOffset(170, 30), BackgroundColor3 = C.Steel, BorderSizePixel = 0, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = C.Text, Text = "CLOSE LOBBY (TEST)" }, gui)
 	corner(close, 3)
 	neon(close, 1)
 	close.Activated:Connect(function()
@@ -229,5 +232,17 @@ if isAdmin then
 		setOpen(true)
 	end)
 end
+
+---------------------------------------------------------------- PLAY -> battlefield map screen (child module PlayScreen)
+local PlayScreen = require(script:WaitForChild("PlayScreen"))
+local play
+play = PlayScreen.new(gui, function()
+	play.Close()
+	main.Visible = true
+end)
+buttons.PLAY.Activated:Connect(function()
+	main.Visible = false
+	play.Open()
+end)
 
 setOpen(true)

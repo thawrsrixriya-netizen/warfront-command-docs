@@ -11,8 +11,21 @@ player sees on join, drawn over the match.
 - **Centre:** a grey "monitor" screen with scanlines and red corner brackets; status text
   `WARFRONT COMMAND // MONITOR 01 // STANDBY`. Content will be designed by the owner later.
 
+## PLAY screen (battlefield map) — `LobbyUI.PlayScreen` (child module) + `ReplicatedStorage.LobbyMapConfig`
+- PLAY opens a full-screen **country map** of the fictional country **Velmoria** (placeholder names): dark
+  topographic style — land, islands, mountain relief, rivers, dashed roads, coordinate grid, sea name.
+- **Markers** (diamond + underlined name) = battlefields. Today only **Dolvin Village** (the current match map) is
+  playable; the other 5 show `LOCKED`.
+- Click a marker → it turns red, a red line runs to the **right panel**: name, status (AVAILABLE / LOCKED),
+  picture placeholder (`Image` in the config, empty for now), short info, and a **4-slot weather forecast**
+  (RAIN, FOG, DAY, NIGHT; possible weather lit, the rest dimmed). Forecast only — players cannot pick weather.
+  Planned: weather buffs/nerfs units (e.g. night = shorter sight, day = longer sight).
+- **NEXT** (bottom right) turns red for a playable place; it does nothing yet. **BACK** (top right) returns to the menu.
+- Edit names, positions, coastline, mountains, rivers, roads and weather in `LobbyMapConfig` (owner's file).
+
 ## Behaviour today
-- **No button works yet** (hover glow only). The owner will design each screen next.
+- PLAY opens the map screen above; **UNIT, SHOP, TRADE, Settings, Leaderboard do nothing yet** (hover only), and
+  NEXT on the map screen does nothing yet. The owner designs each screen next.
 - While open it covers the match and swallows game keys (1–6, M, WASD, arrows, Space, Q, E, Z, F, T, C, G, X), so
   nothing happens in the match behind it. Player attribute `InLobby` = true while open.
 - Admins (`EconomyConfig.Admins`) get a **CLOSE LOBBY (TEST)** button (top right) to go into the match for testing,

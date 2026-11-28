@@ -1,9 +1,10 @@
 -- StarterPlayer.StarterPlayerScripts.LobbyUI.PlayScreen  (ModuleScript)
 -- PlayScreen (client, owner): the lobby's PLAY window — a country map (LobbyMapConfig) with battlefield
 -- markers. Click a marker -> panel on the right (picture placeholder, status, 4-slot weather forecast) and a
--- line from the marker to the panel. NEXT (bottom right) lights up for playable places; it does nothing yet.
+-- line from the marker to the panel. NEXT (bottom right) lights up for playable places and opens the SQUAD screen.
 -- BACK (top right) returns to the lobby menu.
--- API: local screen = PlayScreen.new(parentGui, onBack); screen.Open(); screen.Close(); screen.Selected()
+-- API: local screen = PlayScreen.new(parentGui, onBack, onNext); screen.Open(); screen.Close(); screen.Selected()
+-- onNext(location) runs when NEXT is pressed with a playable place selected.
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Map = require(ReplicatedStorage:WaitForChild("LobbyMapConfig"))
@@ -40,7 +41,7 @@ end
 
 local PlayScreen = {}
 
-function PlayScreen.new(parentGui, onBack)
+function PlayScreen.new(parentGui, onBack, onNext)
 	local root = new("Frame", { Name = "PlayScreen", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, ZIndex = 2 }, parentGui)
 
 	------------------------------------------------------------ the map (everything in 0..1 scale of `map`)
@@ -254,7 +255,11 @@ function PlayScreen.new(parentGui, onBack)
 	nextBtn.MouseLeave:Connect(function()
 		nextGlow.Transparency = nextBtn:GetAttribute("Enabled") and 0.7 or 0.95
 	end)
-	-- NEXT does nothing yet (the owner will design the next screen)
+	nextBtn.Activated:Connect(function()
+		if nextBtn:GetAttribute("Enabled") and selected and onNext then
+			onNext(selected)
+		end
+	end)
 
 	------------------------------------------------------------ selection
 	local function placeLink()

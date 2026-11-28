@@ -23,9 +23,20 @@ player sees on join, drawn over the match.
 - **NEXT** (bottom right) turns red for a playable place; it does nothing yet. **BACK** (top right) returns to the menu.
 - Edit names, positions, coastline, mountains, rivers, roads and weather in `LobbyMapConfig` (owner's file).
 
+## SQUAD screen (after NEXT) — `LobbyUI.SquadScreen` + `ReplicatedStorage.LobbyItemsConfig`
+- Top: the player's avatar (tall box), a "+" box for PLAYER 2 (invite — soon), **START** (red, does nothing yet)
+  and **BACK** (returns to the map). The chosen place is shown under the SQUAD title.
+- Bottom, left to right: **difficulty** EASY 20 / NORMAL 30 / HARD 35 / **NIGHTMARE 40** waves (new difficulty;
+  `WaveConfig.TotalWaves.Nightmare = 40`), **UNIT** slots 1–6, **SKILL** slots 1–3 + **DEFENSE** slots 1–4, and the
+  **items box** (things bought in the shop): tabs UNITS / SKILLS / DEFENSE, item cards, a details strip and
+  **LOADOUT used/10** (units cost loadout points: infantry 2, BMP 3, special forces 3, MBT 5).
+- Click a card to equip/unequip it; click a filled slot to empty it. Not-owned items show `SHOP`.
+- **Placeholder:** everything is local to the screen — nothing is saved, the shop does not exist, "Owned" is fixed in
+  `LobbyItemsConfig`. The chosen difficulty and loadout do not reach the match yet.
+
 ## Behaviour today
-- PLAY opens the map screen above; **UNIT, SHOP, TRADE, Settings, Leaderboard do nothing yet** (hover only), and
-  NEXT on the map screen does nothing yet. The owner designs each screen next.
+- PLAY → map → NEXT → SQUAD works; **START, UNIT, SHOP, TRADE, Settings, Leaderboard and PLAYER 2 do nothing yet**
+  (hover only). The owner designs each screen next.
 - While open it covers the match and swallows game keys (1–6, M, WASD, arrows, Space, Q, E, Z, F, T, C, G, X), so
   nothing happens in the match behind it. Player attribute `InLobby` = true while open.
 - Admins (`EconomyConfig.Admins`) get a **CLOSE LOBBY (TEST)** button (top right) to go into the match for testing,

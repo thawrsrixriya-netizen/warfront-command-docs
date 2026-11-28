@@ -6,6 +6,14 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v451) — Lobby SQUAD screen + Nightmare difficulty
+- NEXT on the map opens the SQUAD screen: avatar, player-2 box (soon), difficulty, unit slots 1–6, skill slots 1–3,
+  defense slots 1–4, items box with tabs and LOADOUT points, START (does nothing yet), BACK.
+- New difficulty **Nightmare = 40 waves** (`WaveConfig.TotalWaves`). New `ReplicatedStorage.LobbyItemsConfig`,
+  `StarterPlayerScripts.LobbyUI.SquadScreen`. Placeholder data only (nothing saved, no shop yet).
+- **Impact:** new units/defences the friend builds should get an entry in `LobbyItemsConfig.Items` (ask the owner for
+  loadout points). Defences (AA, HMG, sandbags) now have 4 loadout slots planned.
+
 ## 2026-11-28 (v446) — Lobby PLAY screen: battlefield map
 - PLAY opens a country map (fictional "Velmoria", placeholder names) with 6 battlefield markers; only Dolvin Village
   (the current match map) is playable. Selecting one shows a side panel with picture placeholder and a 4-slot

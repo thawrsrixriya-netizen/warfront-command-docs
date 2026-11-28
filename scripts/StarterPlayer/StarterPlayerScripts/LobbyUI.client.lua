@@ -218,7 +218,8 @@ local function setOpen(open)
 end
 
 if isAdmin then
-	local close = new("TextButton", { Name = "CloseTest", AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 18), ZIndex = 5, Size = UDim2.fromOffset(170, 30), BackgroundColor3 = C.Steel, BorderSizePixel = 0, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = C.Text, Text = "CLOSE LOBBY (TEST)" }, gui)
+	-- left of the BACK buttons so it never covers a screen's content
+	local close = new("TextButton", { Name = "CloseTest", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -180, 0, 26), ZIndex = 5, Size = UDim2.fromOffset(170, 30), BackgroundColor3 = C.Steel, BorderSizePixel = 0, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = C.Text, Text = "CLOSE LOBBY (TEST)" }, gui)
 	corner(close, 3)
 	neon(close, 1)
 	close.Activated:Connect(function()
@@ -235,10 +236,19 @@ end
 
 ---------------------------------------------------------------- PLAY -> battlefield map screen (child module PlayScreen)
 local PlayScreen = require(script:WaitForChild("PlayScreen"))
-local play
+local SquadScreen = require(script:WaitForChild("SquadScreen"))
+local play, squad
+-- map NEXT -> squad screen (child module SquadScreen); squad BACK -> map
+squad = SquadScreen.new(gui, function()
+	squad.Close()
+	play.Open()
+end)
 play = PlayScreen.new(gui, function()
 	play.Close()
 	main.Visible = true
+end, function(location)
+	play.Close()
+	squad.Open(location)
 end)
 buttons.PLAY.Activated:Connect(function()
 	main.Visible = false

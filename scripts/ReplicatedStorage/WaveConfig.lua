@@ -5,7 +5,7 @@
 -- centre base, then hold a random spot inside the capture zone (so they can take it back).
 local Config = {}
 
-Config.TotalWaves = { Easy = 20, Normal = 30, Hard = 35 } -- difficulty = EconomyConfig.Difficulty
+Config.TotalWaves = { Easy = 20, Normal = 30, Hard = 35, Nightmare = 40 } -- difficulty = EconomyConfig.Difficulty
 Config.BreakEvery = 5 -- a long break after every 5th wave...
 Config.LongBreak = 20 -- ...of this many seconds
 Config.ShortBreak = 3 -- between the other waves

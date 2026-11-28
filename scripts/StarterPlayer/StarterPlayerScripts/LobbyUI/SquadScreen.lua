@@ -54,6 +54,18 @@ local function hoverGlow(button, glow, base)
 	end)
 end
 
+-- hover highlight for every clickable box: a thick soft red glow fades in under the mouse
+local function addHover(button)
+	local glow = new("UIStroke", { Name = "HoverGlow", Color = Color3.fromRGB(255, 40, 40), Thickness = 5, Transparency = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, button)
+	button.MouseEnter:Connect(function()
+		TweenService:Create(glow, TweenInfo.new(0.12), { Transparency = 0.1 }):Play()
+	end)
+	button.MouseLeave:Connect(function()
+		TweenService:Create(glow, TweenInfo.new(0.18), { Transparency = 1 }):Play()
+	end)
+	return glow
+end
+
 local byId = {}
 for _, it in ipairs(Items.Items) do
 	byId[it.Id] = it
@@ -144,6 +156,7 @@ function SquadScreen.new(parentGui, onBack)
 		local b = new("TextButton", { Name = d.Id, Text = "", AutoButtonColor = false, Position = UDim2.new(0, 0, (i - 1) / nd, HEAD + 4 - (i - 1) * (HEAD + 4) / nd), Size = UDim2.new(1, 0, 1 / nd, -(HEAD + 4) / nd - 6), BackgroundColor3 = C.Steel, BorderSizePixel = 0 }, diffCol)
 		corner(b)
 		local line, glow = neon(b, 2)
+		addHover(b)
 		local t = label(b, { Size = UDim2.new(1, 0, 0.7, 0), Font = Enum.Font.GothamBlack, TextSize = 22, Text = d.Label })
 		label(b, { Position = UDim2.fromScale(0, 0.6), Size = UDim2.new(1, 0, 0.3, 0), TextSize = 11, TextColor3 = C.Muted, Text = d.Waves .. " WAVES" })
 		diffButtons[d.Id] = { Button = b, Line = line, Glow = glow, Title = t }
@@ -169,6 +182,7 @@ function SquadScreen.new(parentGui, onBack)
 		local b = new("TextButton", { Name = kind .. index, Text = "", AutoButtonColor = false, Position = pos, Size = size, BackgroundColor3 = C.SlotBox, BorderSizePixel = 0 }, parent)
 		corner(b, 4)
 		local st = new("UIStroke", { Color = C.NeonSoft, Thickness = 2, Transparency = 0.15, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, b)
+		addHover(b)
 		local num = new("Frame", { Name = "Number", Size = UDim2.fromOffset(22, 18), BackgroundColor3 = C.Neon, BackgroundTransparency = 0.15, BorderSizePixel = 0 }, b)
 		corner(num, 3)
 		label(num, { Size = UDim2.fromScale(1, 1), Font = Enum.Font.GothamBlack, TextSize = 12, Text = tostring(index) })
@@ -320,6 +334,10 @@ function SquadScreen.new(parentGui, onBack)
 				card.MouseButton1Down:Connect(function()
 					pressAnim(card)
 				end)
+				local hov = addHover(card)
+				if card.GuiState == Enum.GuiState.Hover then
+					hov.Transparency = 0.1 -- rebuilt under the mouse: keep the glow
+				end
 			end
 		end
 	end
@@ -328,6 +346,7 @@ function SquadScreen.new(parentGui, onBack)
 		local b = new("TextButton", { Name = t[1], LayoutOrder = order, Size = UDim2.fromOffset(120, 30), BackgroundColor3 = C.Slot, BorderSizePixel = 0, Font = Enum.Font.GothamBlack, TextSize = 13, TextColor3 = C.Text, Text = t[2], AutoButtonColor = false }, tabRow)
 		corner(b)
 		tabs[t[1]] = { Button = b, Stroke = new("UIStroke", { Color = C.Neon, Thickness = 1 }, b) }
+		addHover(b)
 		b.Activated:Connect(function()
 			pressAnim(b)
 			currentTab = t[1]

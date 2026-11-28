@@ -6,6 +6,10 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v456) — SQUAD screen: hover highlight
+- Slots, difficulty buttons, tabs and item cards get a thick red glow border under the mouse.
+- **Impact:** none.
+
 ## 2026-11-28 (v455) — SQUAD screen: "+" jumps to its tab
 - Clicking an empty "+" slot plays a press animation and switches the items box to that kind (UNITS / SKILLS /
   DEFENSE) with a short flash. Tabs and cards also have the press animation.

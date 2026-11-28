@@ -3,7 +3,8 @@
 --   top: player character (avatar) + "+" box for player 2 (soon); START (does nothing yet) + BACK.
 --   bottom: difficulty (EASY/NORMAL/HARD/NIGHTMARE) | UNIT slots 1-6 | SKILL slots 1-3 + DEFENSE slots 1-4 |
 --   red box = the player's items (from the shop) with tabs UNITS / SKILLS / DEFENSE, a details strip and loadout points.
--- Click a card to see it and equip/unequip it; click a filled slot to empty it. Units cost loadout points.
+-- Click a card to see it and equip/unequip it; click a filled slot to empty it; click an empty "+" slot to jump
+-- to that kind's tab (with a press animation). Units cost loadout points.
 -- PLACEHOLDER: state is local only (nothing saved, no shop yet). Data: ReplicatedStorage.LobbyItemsConfig.
 -- API: local s = SquadScreen.new(parentGui, onBack); s.Open(location); s.Close(); s.State()
 local Players = game:GetService("Players")
@@ -156,6 +157,14 @@ function SquadScreen.new(parentGui, onBack)
 	local slotFrames = { Unit = {}, Skill = {}, Defense = {} }
 	local listFor = { Unit = state.Units, Skill = state.Skills, Defense = state.Defense }
 	local refreshAll -- forward
+	local currentTab = "Unit"
+	local focusItems -- forward: flashes the items box
+	-- pressed feel: shrink a little and spring back
+	local function pressAnim(button)
+		local sc = button:FindFirstChildOfClass("UIScale") or new("UIScale", {}, button)
+		sc.Scale = 0.9
+		TweenService:Create(sc, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+	end
 	local function makeSlot(parent, kind, index, pos, size)
 		local b = new("TextButton", { Name = kind .. index, Text = "", AutoButtonColor = false, Position = pos, Size = size, BackgroundColor3 = C.SlotBox, BorderSizePixel = 0 }, parent)
 		corner(b, 4)
@@ -167,13 +176,19 @@ function SquadScreen.new(parentGui, onBack)
 		local extra = label(b, { AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -6, 1, -3), Size = UDim2.fromOffset(44, 13), TextSize = 11, TextColor3 = C.Text, TextXAlignment = Enum.TextXAlignment.Right, Text = "" })
 		slotFrames[kind][index] = { Button = b, Stroke = st, Name = name, Extra = extra }
 		b.Activated:Connect(function()
+			pressAnim(b)
 			local list = listFor[kind]
 			local id = list[index]
 			if id then
 				table.remove(list, index) -- empty the slot (later slots move up)
 				selectedItem = byId[id]
-				refreshAll()
+			else
+				currentTab = kind -- empty "+": jump straight to that kind's items
+				if focusItems then
+					focusItems()
+				end
 			end
+			refreshAll()
 		end)
 	end
 
@@ -209,11 +224,22 @@ function SquadScreen.new(parentGui, onBack)
 	local pointsLabel = label(detail, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -12, 0.5, 0), Size = UDim2.new(0.38, -12, 0, 40), Font = Enum.Font.GothamBlack, TextSize = 22, TextXAlignment = Enum.TextXAlignment.Right, Text = "" })
 	-- tabs
 	local tabs = {}
-	local currentTab = "Unit"
 	local tabRow = new("Frame", { Name = "Tabs", Position = UDim2.fromOffset(12, 82), Size = UDim2.new(1, -24, 0, 30), BackgroundTransparency = 1 }, inv)
 	new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8) }, tabRow)
 	local grid = new("ScrollingFrame", { Name = "Cards", Position = UDim2.fromOffset(12, 120), Size = UDim2.new(1, -24, 1, -130), BackgroundTransparency = 1, BorderSizePixel = 0, ScrollBarThickness = 4, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y }, inv)
 	new("UIGridLayout", { CellSize = UDim2.fromOffset(118, 96), CellPadding = UDim2.fromOffset(10, 10) }, grid)
+
+	local invLine = inv:FindFirstChildOfClass("UIStroke")
+	function focusItems()
+		-- brief white flash on the items box so the eye follows the jump
+		for _, st in ipairs(inv:GetChildren()) do
+			if st:IsA("UIStroke") then
+				local base = st.Transparency
+				st.Color = Color3.new(1, 1, 1)
+				TweenService:Create(st, TweenInfo.new(0.35), { Color = C.Neon, Transparency = base }):Play()
+			end
+		end
+	end
 
 	local function usedPoints()
 		local n = 0
@@ -291,6 +317,9 @@ function SquadScreen.new(parentGui, onBack)
 				card.Activated:Connect(function()
 					toggle(item)
 				end)
+				card.MouseButton1Down:Connect(function()
+					pressAnim(card)
+				end)
 			end
 		end
 	end
@@ -300,6 +329,7 @@ function SquadScreen.new(parentGui, onBack)
 		corner(b)
 		tabs[t[1]] = { Button = b, Stroke = new("UIStroke", { Color = C.Neon, Thickness = 1 }, b) }
 		b.Activated:Connect(function()
+			pressAnim(b)
 			currentTab = t[1]
 			refreshAll()
 		end)

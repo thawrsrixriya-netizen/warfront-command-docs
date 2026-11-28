@@ -6,6 +6,11 @@ The friend's big changes arrive as `change-report` Issues; Claude links them her
 
 ---
 
+## 2026-11-28 (v455) — SQUAD screen: "+" jumps to its tab
+- Clicking an empty "+" slot plays a press animation and switches the items box to that kind (UNITS / SKILLS /
+  DEFENSE) with a short flash. Tabs and cards also have the press animation.
+- **Impact:** none.
+
 ## 2026-11-28 (v454) — SQUAD screen: clearer slots
 - Slots have solid borders, a red number badge and more spacing; UNIT / SKILL / DEFENSE headers are red.
 - **Impact:** none.
